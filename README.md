@@ -18,7 +18,7 @@ Usage
     # for existing project
     $ heroku buildpacks:set https://github.com/ddollar/heroku-buildpack-multi
 
-    $ heroku config:set FFMPEG_RELEASE_URL=https://ffmpeg.org/releases/ffmpeg-2.6.2.tar.bz2
+    $ heroku config:set FFMPEG_BIN_URL="http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz"
 
     $ git push heroku master
 
