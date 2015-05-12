@@ -7,47 +7,40 @@ indent() {
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
-VENDOR_DIR="$BUILD_DIR/vendor"
+VENDOR_BIN_DIR="$BUILD_DIR/vendor/bin"
 PROFILE_PATH="$BUILD_DIR/.profile.d/ffmpeg.sh"
-FFMPEG_RELEASE_URL="https://ffmpeg.org/releases/ffmpeg-2.6.2.tar.bz2"
-
-if [ -f "$ENV_DIR/FFMPEG_RELEASE_URL" ]; then
-  FFMPEG_RELEASE_URL=$(cat $ENV_DIR/FFMPEG_RELEASE_URL)
+FFMPEG_BIN_URL="http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz"
+if [ -f "$ENV_DIR/FFMPEG_BIN_URL" ]; then
+  FFMPEG_BIN_URL=$(cat $ENV_DIR/FFMPEG_BIN_URL)
 fi
-
-FFMPEG_FILE=${FFMPEG_RELEASE_URL##*/}
+FFMPEG_FILE=${FFMPEG_BIN_URL##*/}
 
 mkdir="mkdir -p"
-
-tar="tar x"
 case ${FFMPEG_FILE##*.} in
-  bz2) tar=${tar}j ;;
-  gz)  tar=${tar}z ;;
+  bz2) tar="tar xj" ;;
+  gz)  tar="tar xz" ;;
+  xz)  tar="tar x"  ;;
   *)
-    echo "Fail to uncompress $FFMPEG_FILE because only gzip, bzip2 are supported." | indent
+    echo "Fail to uncompress $FFMPEG_FILE because only xz, gzip, bzip2 are supported." | indent
     exit 1
     ;;
 esac
-tar="${tar} --checkpoint -C $VENDOR_DIR -f"
-extract=$tar
-
-verify="gpg --verify"
+download="curl -L -s --create-dirs -o"
+extract="${tar} -C $VENDOR_BIN_DIR --strip-components 1 -f"
 
 
 echo "-----> Installing ffmpeg..."
 
-$mkdir $VENDOR_DIR
+$mkdir $VENDOR_BIN_DIR
 $mkdir ${PROFILE_PATH%/*}
 
 if [ ! -f "$CACHE_DIR/$FFMPEG_FILE" ]; then
-  curl -L -# --create-dirs -o $CACHE_DIR/$FFMPEG_FILE $FFMPEG_RELEASE_URL
-  curl -L -# --create-dirs -o $CACHE_DIR/$FFMPEG_FILE.asc $FFMPEG_RELEASE_URL.asc
-
-  $verify $CACHE_DIR/$FFMPEG_FILE.asc $CACHE_DIR/$FFMPEG_FILE
+  echo "downloading ffmpeg: $FFMPEG_BIN_URL" | indent
+  $download $CACHE_DIR/$FFMPEG_FILE $FFMPEG_BIN_URL
+  #TODO sha256sum $CACHE_DIR/$FFMPEG_FILE
 fi
 
-$extract $CACHE_DIR/$FFMPEG_FILE
+$extract $CACHE_DIR/$FFMPEG_FILE *ffmpeg
 
-echo "exporting PATH and LIBRARY_PATH" | indent
-echo 'export PATH="$PATH:$HOME/vendor/ffmpeg/bin"' >> $PROFILE_PATH
-echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/vendor/ffmpeg/lib"' >> $PROFILE_PATH
+echo "exporting PATH" | indent
+echo 'export PATH="$PATH:$HOME/vendor/bin"' >> $PROFILE_PATH
