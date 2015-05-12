@@ -26,7 +26,7 @@ case ${FFMPEG_FILE##*.} in
     ;;
 esac
 download="curl -L -s --create-dirs -o"
-extract="${tar} -C $VENDOR_BIN_DIR --strip-components 1 -f"
+extract="${tar} -C $VENDOR_BIN_DIR --strip-components 1 --wildcards -f"
 
 
 echo "-----> Installing ffmpeg..."
