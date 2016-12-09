@@ -40,7 +40,7 @@ if [ ! -f "$CACHE_DIR/$FFMPEG_FILE" ]; then
   #TODO sha256sum $CACHE_DIR/$FFMPEG_FILE
 fi
 
-$extract $CACHE_DIR/$FFMPEG_FILE *ffmpeg
+$extract $CACHE_DIR/$FFMPEG_FILE
 
 echo "exporting PATH" | indent
 echo 'export PATH="$PATH:$HOME/vendor/bin"' >> $PROFILE_PATH
